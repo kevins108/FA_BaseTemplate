@@ -30,8 +30,7 @@ var host = new HostBuilder()
 		// Add DB Connection
 		var build = services.BuildServiceProvider();
 		var config = build.GetService<IConfiguration>();
-		services.AddDbContext<DataContext>(options => SqlServerDbContextOptionsExtensions
-				.UseSqlServer(options, config?.GetConnectionString("DATABASE")));
+		services.AddDbContext<DataContext>(options => options.UseSqlServer(config?["DATABASE"]));
 
 	})
 	.ConfigureFunctionsWorkerDefaults(app =>
