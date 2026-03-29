@@ -1,24 +1,28 @@
-﻿using FA_BaseTemplate.Data;
+﻿using FA_BaseTemplate.Configuration;
+using FA_BaseTemplate.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace FA_BaseTemplate.Repository
 {
 	public class AccountInformationRepository
 	{
-		private readonly IConfiguration configs;
+		private readonly IOptions<AppSettings> settings;
 		private readonly DataContext context;
+		private readonly ILogger<AccountInformationRepository> logger;
 
-		public AccountInformationRepository(IConfiguration configs, DataContext context)
+		public AccountInformationRepository(IOptions<AppSettings> settings, DataContext context, ILogger<AccountInformationRepository> logger)
 		{
-			this.configs = configs;
+			this.settings = settings;
 			this.context = context;
+			this.logger = logger;
 		}
 
 		public async Task ProcessAccountInformation()
 		{
-			// Get Key value from Azure
-			var key = configs["ApplicationSettings:KEY"];
+			// Get Key value from AppSettings
+			var key = settings.Value.ApplicationSettings?.Key;
 
 			try
 			{
@@ -39,14 +43,8 @@ namespace FA_BaseTemplate.Repository
 			}
 			catch (Exception ex)
 			{
-				LogError(ex);
+				logger.LogError(ex, "An error occurred while processing account information.");
 			}
-		}
-
-
-		public void LogError(Exception ex)
-		{
-			throw new Exception($"Exception Message: {ex}");
 		}
 	}
 }
