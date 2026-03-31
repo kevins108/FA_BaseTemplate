@@ -9,24 +9,33 @@ namespace FA_BaseTemplate
 		private readonly ILogger logger;
 		private readonly AccountInformationRepository accountRepo;
 
-		public Account_Function(ILoggerFactory loggerFactory, AccountInformationRepository accountRepo)
+		public Account_Function(
+			ILoggerFactory loggerFactory, 
+			AccountInformationRepository accountRepo)
 		{
 			this.logger = loggerFactory.CreateLogger<Account_Function>();
 			this.accountRepo = accountRepo;
 		}
 
 		[Function("AccountInfo_Function")]
-		public async Task Run([TimerTrigger("* * * * *")] TimerInfo myTimer)
+		public async Task Run([TimerTrigger("0 */5 * * * *")] TimerInfo myTimer)
 		{
-			logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
-
-			if (myTimer.ScheduleStatus is not null)
+			try
 			{
-				logger.LogInformation($"Next timer schedule at: {myTimer.ScheduleStatus.Next}");
+				logger.LogInformation($"Timer trigger function started at: {DateTime.UtcNow}");
 
-				await accountRepo.ProcessAccountInformation();
+				if (myTimer.ScheduleStatus is not null)
+				{
+					logger.LogInformation($"Next timer execution at: {myTimer.ScheduleStatus.Next}");
+					await accountRepo.ProcessAccountInformation();
+					logger.LogInformation("Account processing completed successfully.");
+				}
+			}
+			catch (Exception ex)
+			{
+				logger.LogError(ex, "Timer function failed.");
+				throw;
 			}
 		}
-
 	}
 }
